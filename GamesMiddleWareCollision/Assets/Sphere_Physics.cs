@@ -5,17 +5,17 @@ using UnityEngine;
 
 public class Sphere_Physics : MonoBehaviour, iCollidable
 {
-    
+
 
     //public float assignRadius;
 
     Vector3 acceleration;
     [SerializeField]
     internal Vector3 velocity;
-    private float mass = 1;
+    [SerializeField] internal float mass = 1;
     public Vector3 previous_Position;
-    internal float Radius {get { return transform.localScale.x / 2f; } set { transform.localScale = 2 * value * Vector3.one; } }
-    private float coeffecientOfRestitution = 0.75f;
+    internal float Radius { get { return transform.localScale.x / 2f; } set { transform.localScale = 2 * value * Vector3.one; } }
+    [SerializeField] private float coeffecientOfRestitution = 0.75f;
     [SerializeField] internal float assignRadius;
 
     // Start is called before the first frame update
@@ -47,7 +47,7 @@ public class Sphere_Physics : MonoBehaviour, iCollidable
               otherSphere.transform.position);
             return distance < Radius + otherSphere.Radius;
         }
-        else
+        else if (otherObject is PlaneScript)
         {
             PlaneScript plane = otherObject as PlaneScript;
             Vector3 sphereToPlane = transform.position - plane.transform.position;
@@ -55,10 +55,9 @@ public class Sphere_Physics : MonoBehaviour, iCollidable
 
             float distance = PhysicsManager.getParallel(sphereToPlane, normal).magnitude;
 
-            print("colliding");
             return distance < Radius;
         }
-        
+        return false;
     }
 
     public void resolvedVelocityForCollisonWith(iCollidable otherObject)
@@ -73,8 +72,8 @@ public class Sphere_Physics : MonoBehaviour, iCollidable
             Vector3 spherePosition;
             Sphere_Physics otherSphere = (Sphere_Physics)(otherObject);
 
-            float d0 = Vector3.Distance(previous_Position, otherSphere.previous_Position) - Radius - otherSphere.Radius;
-            float d1 = Vector3.Distance(transform.position,otherSphere.transform.position) - Radius - otherSphere.Radius;
+            float d0 = (Vector3.Distance(previous_Position, otherSphere.previous_Position)) - Radius - otherSphere.Radius;
+            float d1 = (Vector3.Distance(transform.position, otherSphere.transform.position)) - Radius - otherSphere.Radius;
 
             float time_Of_Impact = d1 * (Time.deltaTime / (d1 - d0));
 
@@ -96,7 +95,7 @@ public class Sphere_Physics : MonoBehaviour, iCollidable
             float M2 = otherSphere.mass;
 
 
-            Vector3 v1 = ((M1 + M2) / (M1 + M2)) * u1 + (2 * M2 / (M1 + M2)) * u2;
+            Vector3 v1 = ((M1 - M2) / (M1 + M2)) * u1 + ((2 * M2) / (M1 + M2)) * u2;
             Vector3 v2 = ((2 * M1) / (M1 + M2)) * u1 + ((M2 - M1) / (M1 + M2)) * u2;
 
             v1 *= coeffecientOfRestitution;
@@ -116,7 +115,7 @@ public class Sphere_Physics : MonoBehaviour, iCollidable
 
             otherSphere.transform.position = spherePosition;
         }
-        else
+        else if (otherObject is PlaneScript)
         {
             PlaneScript plane = otherObject as PlaneScript;
             Vector3 normal = plane.transform.up;
@@ -124,7 +123,7 @@ public class Sphere_Physics : MonoBehaviour, iCollidable
 
             transform.position += PhysicsManager.getPerpendicular(vTime, normal) - PhysicsManager.getParallel(vTime, normal);
 
-            velocity = PhysicsManager.getPerpendicular(velocity, normal) -(coeffecientOfRestitution * PhysicsManager.getParallel(velocity, normal));
+            velocity = PhysicsManager.getPerpendicular(velocity, normal) - (coeffecientOfRestitution * PhysicsManager.getParallel(velocity, normal));
             //Vector3 parrellelV = PhysicsManager.getParallel(this.velocity, normal);
             //Vector3 perpendicularV = PhysicsManager.getPerpendicular(this.velocity, normal);
             //velocity = perpendicularV - parrellelV;
