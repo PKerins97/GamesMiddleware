@@ -8,7 +8,12 @@ public class PlayerScript : MonoBehaviour
     float velocity = 3.0f;
     public float acceleration = 0.1f;
     private float current_speed = 2;
-    private float BACKWARDS_SPEED = 2, RUNNING_SPEED = 5;
+    public AudioSource src;
+    public AudioClip shooting;
+
+    private float currentHorizontalValue;
+    private float currentVerticalValue;
+    [SerializeField] float valueSmoothing;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,30 +25,45 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        PlayerAnimator.SetFloat("Y", Input.GetAxis("Vertical"));
-        PlayerAnimator.SetFloat("X", Input.GetAxis("Horizontal"));
+        float targetSpeedVertical = Input.GetAxis("Vertical");
+        float targetSpeedHorizontal = Input.GetAxis("Horizontal");
+
+
 
         bool forward = Input.GetKey("w");
         bool back = Input.GetKey("s");
         bool left = Input.GetKey("a");
         bool right = Input.GetKey("d");
+        bool attack = Input.GetKey("p");
+
+        currentHorizontalValue = Mathf.Lerp(currentHorizontalValue, targetSpeedHorizontal, Time.deltaTime * valueSmoothing);
+        currentVerticalValue = Mathf.Lerp(currentVerticalValue, targetSpeedVertical, Time.deltaTime * valueSmoothing);
+
+        PlayerAnimator.SetFloat("Y", currentVerticalValue);
+        PlayerAnimator.SetFloat("X", currentHorizontalValue);
+
         if (forward)
         {
             transform.position += current_speed * transform.forward * Time.deltaTime;
         }
         if (back)
         {
-            transform.position -= BACKWARDS_SPEED * transform.forward * Time.deltaTime;
+            transform.position -= current_speed * transform.forward * Time.deltaTime;
         }
         if (left)
         {
-            transform.position -= BACKWARDS_SPEED * transform.right * Time.deltaTime;
+            transform.position -= current_speed * transform.right * Time.deltaTime;
         }
         if (right)
         {
-            transform.position += BACKWARDS_SPEED * transform.right * Time.deltaTime;
+            transform.position += current_speed * transform.right * Time.deltaTime;
         }
-
+        if (attack)
+        {
+            PlayerAnimator.SetTrigger("Attacking");
+            src.clip = shooting;
+            src.PlayDelayed(0.6f);
+        }
 
     }
 }
