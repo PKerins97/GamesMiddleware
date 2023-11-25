@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
-public class PlayerScript : MonoBehaviour
+public class PlayerScript : NetworkBehaviour
 {
     public Animator PlayerAnimator;
     float velocity = 3.0f;
@@ -25,6 +26,8 @@ public class PlayerScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!IsOwner) return;
+
         float targetSpeedVertical = Input.GetAxis("Vertical");
         float targetSpeedHorizontal = Input.GetAxis("Horizontal");
 
